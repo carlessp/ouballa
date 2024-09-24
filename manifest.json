@@ -2,21 +2,21 @@
   "name": "L'Ou com balla",
   "short_name": "Joc de Veu",
   "description": "Joc de Feedback de veu",
-  "start_url": "https://carlessp.github.io/ouballa/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#60a5fa",
   "theme_color": "#3b82f6",
   "icons": [
     {
-      "src": "icon-192x192.svg",
+      "src": "icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512x512.svg",
+      "src": "icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
