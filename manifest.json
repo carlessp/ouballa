@@ -2,7 +2,7 @@
   "name": "L'Ou com balla",
   "short_name": "Joc de Veu",
   "description": "Joc de Feedback de Veu",
-  "start_url": "/",
+  "start_url": "https://carlessp.github.io/ouballa/",
   "display": "standalone",
   "background_color": "#60a5fa",
   "theme_color": "#3b82f6",
