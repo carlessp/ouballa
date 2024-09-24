@@ -3,7 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Joc de Veu">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Joc de Feedback de Veu amb Font per a alumnes amb disàrtria</title>
     <style>
@@ -314,6 +320,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', () => {
         zonaObjectiu.style.top = `${Math.min(zonaObjectiu.offsetTop, window.innerHeight - zonaObjectiu.offsetHeight)}px`;
     });
+
+    // Registrar el Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('Service Worker registrat amb èxit:', registration);
+            })
+            .catch(error => {
+                console.log('Error en registrar el Service Worker:', error);
+            });
+    }
 });
 
 let isDragging = false;
