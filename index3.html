@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joc de la Font 8-bit i l'Ou per a alumnes amb disàrtria</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 100vh;
+            background-color: #87CEEB;
+        }
+        #joc {
+            position: relative;
+            width: 100vw;
+            height: 600px;
+        }
+        #base-pedra {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 40px;
+            background-color: #808080;
+            image-rendering: pixelated;
+        }
+        #base-pedra::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background-image: 
+                linear-gradient(90deg, #6a6a6a 25%, transparent 25%),
+                linear-gradient(90deg, transparent 75%, #6a6a6a 75%);
+            background-size: 20px 10px;
+        }
+        #gespa {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background-color: #228B22;
+            image-rendering: pixelated;
+        }
+        #gespa::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background-image: 
+                linear-gradient(45deg, transparent 50%, #228B22 50%),
+                linear-gradient(-45deg, transparent 50%, #228B22 50%);
+            background-size: 10px 10px;
+            background-position: 0 5px;
+        }
+        #font {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 50px;
+            background-color: #808080;
+            image-rendering: pixelated;
+            clip-path: polygon(
+                0% 100%, 100% 100%,
+                100% 20%, 90% 10%, 80% 20%, 70% 10%,
+                60% 20%, 50% 10%, 40% 20%, 30% 10%,
+                20% 20%, 10% 10%, 0% 20%
+            );
+            z-index: 2;
+        }
+        #aigua {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 0;
+            background: linear-gradient(to bottom, #00BFFF, #1E90FF, #4169E1);
+            transition: height 0.1s;
+            image-rendering: pixelated;
+            overflow: hidden;
+            z-index: 1;
+        }
+        #aigua::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            animation: waterWave 2s infinite linear;
+        }
+        @keyframes waterWave {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        #ou {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            width: 32px;
+            height: 40px;
+            background-color: #FFFFFF;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            transform: translateX(-50%);
+            image-rendering: pixelated;
+            box-shadow: 
+                2px 0 0 #000,
+                -2px 0 0 #000,
+                0 -2px 0 #000,
+                0 2px 0 #000;
+            z-index: 3;
+            transition: box-shadow 0.3s;
+        }
+        #ou.brillant {
+            box-shadow: 
+                2px 0 0 #FFD700,
+                -2px 0 0 #FFD700,
+                0 -2px 0 #FFD700,
+                0 2px 0 #FFD700;
+        }
+        #botoDInici {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #puntuacio {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #zonaObjectiu {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 40px;
+            background-color: rgba(255, 255, 0, 0.3);
+            border: 2px dashed yellow;
+            z-index: 4;
+            cursor: move;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        #instruccions {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            transition: opacity 0.5s;
+        }
+        .foc-artifici {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            animation: explotar 1s ease-out forwards;
+        }
+        .foc-artifici:nth-child(2) { background-color: orange; }
+        .foc-artifici:nth-child(3) { background-color: yellow; }
+        .foc-artifici:nth-child(4) { background-color: green; }
+        .foc-artifici:nth-child(5) { background-color: blue; }
+        .foc-artifici:nth-child(6) { background-color: indigo; }
+        .foc-artifici:nth-child(7) { background-color: violet; }
+
+        @keyframes explotar {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(3) translateY(-100px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="joc">
+        <div id="gespa"></div>
+        <div id="base-pedra"></div>
+        <div id="aigua"></div>
+        <div id="font"></div>
+        <div id="ou"></div>
+        <div id="zonaObjectiu"></div>
+        <button id="botoDInici">Iniciar Joc</button>
+        <div id="puntuacio">Punts: 0</div>
+        <div id="instruccions">
+            Arrossegueu la zona groga per ajustar la dificultat.<br>
+            Parleu al micròfon per moure l'ou.<br>
+            Manteniu l'ou dins la zona groga per guanyar punts.
+        </div>
+    </div>
+
+    <script>
+        let audioContext;
+        let analyser;
+        let microphone;
+        let isPlaying = false;
+        let punts = 0;
+        let tempsInicial;
+        let tempsZonaObjectiu = 0;
+
+        const ou = document.getElementById('ou');
+        const aigua = document.getElementById('aigua');
+        const botoDInici = document.getElementById('botoDInici');
+        const puntuacioElement = document.getElementById('puntuacio');
+        const zonaObjectiu = document.getElementById('zonaObjectiu');
+        const instruccions = document.getElementById('instruccions');
+
+        let velocitatY = 0;
+        let posicioY = 0;
+        let amplitudOscilacio = 0;
+        let freqOscilacio = 0;
+        let tempsOscilacio = 0;
+
+        const ouAlcada = 40;
+        const ouAmplada = 32;
+
+        botoDInici.addEventListener('click', iniciarJoc);
+
+        // Configuració del drag and drop per a la zona objectiu
+        let isDragging = false;
+        let startY;
+        let startTop;
+
+        zonaObjectiu.addEventListener('mousedown', startDragging);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDragging);
+
+        zonaObjectiu.addEventListener('touchstart', startDragging);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', stopDragging);
+
+        function startDragging(e) {
+            isDragging = true;
+            startY = e.clientY || e.touches[0].clientY;
+            startTop = zonaObjectiu.offsetTop;
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            const y = e.clientY || e.touches[0].clientY;
+            const deltaY = y - startY;
+            let newTop = startTop + deltaY;
+
+            // Limitar el moviment dins del joc
+            newTop = Math.max(0, Math.min(newTop, 560)); // 600 - 40 (alçada de la zona)
+
+            zonaObjectiu.style.top = `${newTop}px`;
+            e.preventDefault();
+        }
+
+        function stopDragging() {
+            isDragging = false;
+        }
+
+        function iniciarJoc() {
+            if (isPlaying) {
+                location.reload();
+                return;
+            }
+
+            isPlaying = true;
+            punts = 0;
+            tempsInicial = Date.now();
+            tempsZonaObjectiu = 0;
+            botoDInici.textContent = 'Reiniciar Joc';
+            instruccions.style.opacity = '0'; // Amagar les instruccions
+            
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
+                        requestAnimationFrame(actualitzarJoc);
+                    })
+                    .catch(error => {
+                        console.error('Error accedint al micròfon:', error);
+                        isPlaying = false;
+                    });
+            } else {
+                requestAnimationFrame(actualitzarJoc);
+            }
+        }
+
+        function actualitzarJoc() {
+            if (!isPlaying) return;
+
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+
+            const volumMitja = dataArray.reduce((a, b) => a + b) / dataArray.length;
+            const alturaAigua = Math.min(450, volumMitja * 8);
+
+            aigua.style.height = `${alturaAigua}px`;
+            aigua.style.clipPath = `polygon(
+                0% 100%, 100% 100%,
+                100% ${100 - alturaAigua / 3}%, 90% ${100 - alturaAigua / 3 - 5}%, 
+                80% ${100 - alturaAigua / 3}%, 70% ${100 - alturaAigua / 3 - 5}%,
+                60% ${100 - alturaAigua / 3}%, 50% ${100 - alturaAigua / 3 - 5}%, 
+                40% ${100 - alturaAigua / 3}%, 30% ${100 - alturaAigua / 3 - 5}%,
+                20% ${100 - alturaAigua / 3}%, 10% ${100 - alturaAigua / 3 - 5}%, 
+                0% ${100 - alturaAigua / 3}%
+            )`;
+
+            const alturaObjectiu = Math.max(0, alturaAigua - 40);
+            const deltaY = alturaObjectiu - posicioY;
+            velocitatY += deltaY * 0.1;
+            velocitatY *= 0.6;
+            posicioY += velocitatY;
+
+            amplitudOscilacio = Math.min(10, volumMitja / 5);
+            freqOscilacio = 0.4 + volumMitja / 1000;
+            tempsOscilacio += freqOscilacio;
+            const oscilacio = Math.sin(tempsOscilacio) * amplitudOscilacio;
+
+            const posicioOuY = 90 + posicioY + oscilacio;
+            ou.style.bottom = `${posicioOuY}px`;
+            ou.style.left = `${window.innerWidth / 2 + oscilacio}px`;
+
+            // Comprovar si almenys un terç de l'ou està dins la zona objectiu
+            const posicioZonaObjectiuTop = zonaObjectiu.offsetTop;
+            const posicioZonaObjectiuBottom = posicioZonaObjectiuTop + 40; // Alçada de la zona objectiu
+            const posicioOuSuperiorY = 600 - posicioOuY - ouAlcada; // Convertir de bottom a top
+            const posicioOuInferiorY = posicioOuSuperiorY + ouAlcada; // Calcula la posició de la part inferior de l'ou
+
+            const terçOu = ouAlcada / 3;
+
+            if (
+                (posicioOuSuperiorY + terçOu >= (posicioZonaObjectiuTop + 5) && posicioOuSuperiorY + terçOu <= (posicioZonaObjectiuBottom - 5)) || 
+                (posicioOuInferiorY - terçOu >= (posicioZonaObjectiuTop + 5) && posicioOuInferiorY - terçOu <= (posicioZonaObjectiuBottom - 5)) || 
+                (posicioOuSuperiorY + terçOu <= (posicioZonaObjectiuTop + 5) && posicioOuInferiorY - terçOu >= (posicioZonaObjectiuBottom - 5))
+            ) {
+                tempsZonaObjectiu += 1/30; // Assumim 60 FPS
+                punts = Math.floor(tempsZonaObjectiu);
+                zonaObjectiu.style.backgroundColor = 'rgba(0, 255, 0, 0.3)'; // Verd quan l'ou és dins
+                zonaObjectiu.style.borderColor = 'green';
+                ou.classList.add('brillant');
+                mostrarFocsArtifici();
+            } else {
+                zonaObjectiu.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; // Groc quan l'ou és fora
+                zonaObjectiu.style.borderColor = 'yellow';
+                ou.classList.remove('brillant');
+            }
+
+            puntuacioElement.textContent = `Punts: ${punts}`;
+
+            requestAnimationFrame(actualitzarJoc);
+        }
+
+        function mostrarFocsArtifici() {
+            const focsArtificiContainer = document.createElement('div');
+            focsArtificiContainer.classList.add('focs-artifici-container');
+            joc.appendChild(focsArtificiContainer);
+
+            for (let i = 0; i < 7; i++) {
+                const focArtifici = document.createElement('div');
+                focArtifici.classList.add('foc-artifici');
+                focArtifici.style.left = `${Math.random() * 100}%`;
+                focsArtificiContainer.appendChild(focArtifici);
+            }
+
+            setTimeout(() => {
+                focsArtificiContainer.remove();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
