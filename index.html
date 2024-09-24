@@ -3,15 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Joc de Veu">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>L'Ou com balla!</title>
+    <title>Joc de Feedback de Veu amb Font per a alumnes amb disàrtria</title>
     <style>
         body,
         html {
@@ -62,11 +56,9 @@
             border: 2px dashed #fde047;
             position: absolute;
             left: 50%;
-            top: 50%; /* Posició inicial */
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             cursor: move;
             z-index: 2;
-            touch-action: none; /* Prevenir comportaments per defecte */
         }
 
         #font {
@@ -102,7 +94,7 @@
             height: 5px;
             background-color: #374151;
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
         }
 
         #aigua {
@@ -236,10 +228,11 @@
             class="absolute left-1/2 transform -translate-x-1/2 w-8 h-12 bg-yellow-200 rounded-full shadow-md transition-all duration-100">
         </div>
         <div id="zona-objectiu"
-            class="absolute left-1/2 transform -translate(-50%, -50%) w-32 h-12 bg-yellow-200 bg-opacity-30 border-2 border-yellow-400 border-dashed cursor-move">
+            class="absolute left-1/2 transform -translate-x-1/2 w-32 h-12 bg-yellow-200 bg-opacity-30 border-2 border-yellow-400 border-dashed cursor-move">
         </div>
         <button id="boto-inici"
-            class="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors duration-200">Inicia el joc!</button>
+            class="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors duration-200">Iniciar
+            Joc</button>
         <div id="puntuacio" class="absolute top-4 right-16 text-lg font-bold text-white">Punts: 0</div>
         <div id="instruccions"
             class="absolute bottom-28 left-4 right-4 text-sm text-center text-white bg-black bg-opacity-50 p-2 rounded">
@@ -247,9 +240,9 @@
             Parleu al micròfon per moure l'objecte.<br>
             Manteniu l'objecte dins la zona groga per guanyar punts.
         </div>
-        <div id="icona-opcions" class="absolute top-4 right-4 w-12 h-12 bg-blue-500 rounded-full cursor-pointer flex items-center justify-center text-2xl hover:bg-blue-600 transition-colors duration-200">
-            ⚙️
-        </div>
+<div id="icona-opcions" class="absolute top-4 right-4 w-12 h-12 bg-blue-500 rounded-full cursor-pointer flex items-center justify-center text-2xl hover:bg-blue-600 transition-colors duration-200">
+    ⚙️
+</div>
         <div id="panell-opcions"
             class="absolute top-0 right-0 w-64 h-full bg-white bg-opacity-90 p-6 transform translate-x-full transition-transform duration-300 ease-in-out">
             <h3 class="text-lg font-bold mb-4">Opcions</h3>
@@ -260,153 +253,217 @@
 
     <script>
         let audioContext;
-        let analyser;
-        let microphone;
-        let isPlaying = false;
-        let punts = 0;
-        let tempsInicial;
-        let tempsZonaObjectiu = 0;
+let analyser;
+let microphone;
+let isPlaying = false;
+let punts = 0;
+let tempsInicial;
+let tempsZonaObjectiu = 0;
 
-        const objecte = document.getElementById('objecte');
-        const aigua = document.getElementById('aigua');
-        const botoInici = document.getElementById('boto-inici');
-        const puntuacioElement = document.getElementById('puntuacio');
-        const zonaObjectiu = document.getElementById('zona-objectiu');
-        const instruccions = document.getElementById('instruccions');
-        const joc = document.getElementById('joc');
-        const iconaOpcions = document.getElementById('icona-opcions');
-        const panellOpcions = document.getElementById('panell-opcions');
-        const sensibilitatSlider = document.getElementById('sensibilitat-slider');
+const objecte = document.getElementById('objecte');
+const aigua = document.getElementById('aigua');
+const botoInici = document.getElementById('boto-inici');
+const puntuacioElement = document.getElementById('puntuacio');
+const zonaObjectiu = document.getElementById('zona-objectiu');
+const instruccions = document.getElementById('instruccions');
+const joc = document.getElementById('joc');
+const iconaOpcions = document.getElementById('icona-opcions');
+const panellOpcions = document.getElementById('panell-opcions');
+const sensibilitatSlider = document.getElementById('sensibilitat-slider');
 
-        let posicioY = 0;
-        let velocitatY = 0;
-        let sensibilitatMicrofon = 2.55;
+let posicioY = 0;
+let velocitatY = 0;
+let sensibilitatMicrofon = 2.55;
 
-        // Iniciem els event listeners després que el DOM estigui carregat
-        document.addEventListener('DOMContentLoaded', () => {
-            // Els listeners ara estan configurats prèviament
-        });
+// Iniciem els event listeners després que el DOM estigui carregat
+document.addEventListener('DOMContentLoaded', () => {
+    // Event listener per al botó d'inici
+    botoInici.addEventListener('click', iniciarJoc);
 
-        function iniciarJoc() {
-            if (isPlaying) {
-                location.reload();
-                return;
-            }
+    // Event listener per a la icona d'opcions
+    iconaOpcions.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePanellOpcions();
+    });
 
-            isPlaying = true;
-            punts = 0;
-            tempsInicial = Date.now();
-            tempsZonaObjectiu = 0;
-            botoInici.textContent = 'Reiniciar Joc';
-            instruccions.style.display = 'none';
+    // Tancar el panell quan es fa clic fora
+    document.addEventListener('click', (e) => {
+        if (panellOpcions.classList.contains('obert') &&
+            !panellOpcions.contains(e.target) &&
+            e.target !== iconaOpcions) {
+            togglePanellOpcions();
+        }
+    });
 
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256;
+    // Evitar que els clics dins del panell el tanquin
+    panellOpcions.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        microphone = audioContext.createMediaStreamSource(stream);
-                        microphone.connect(analyser);
-                        requestAnimationFrame(actualitzarJoc);
-                    })
-                    .catch(error => {
-                        console.error('Error accedint al micròfon:', error);
-                        isPlaying = false;
-                        alert('Necessites permetre l\'accés al micròfon per jugar.');
-                    });
-            } else {
+    // Configuració del drag and drop per a la zona objectiu utilitzant Pointer Events
+    zonaObjectiu.addEventListener('pointerdown', startDragging);
+    document.addEventListener('pointermove', drag);
+    document.addEventListener('pointerup', stopDragging);
+
+    // Event listener per al slider de sensibilitat
+    sensibilitatSlider.addEventListener('input', (e) => {
+        sensibilitatMicrofon = parseFloat(e.target.value);
+    });
+
+    // Ajustar mides quan es redimensiona la finestra
+    window.addEventListener('resize', () => {
+        zonaObjectiu.style.top = `${Math.min(zonaObjectiu.offsetTop, window.innerHeight - zonaObjectiu.offsetHeight)}px`;
+    });
+});
+
+let isDragging = false;
+let startY;
+let startTop;
+
+function startDragging(e) {
+    isDragging = true;
+    startY = e.clientY;
+    startTop = zonaObjectiu.offsetTop;
+    e.preventDefault();
+}
+
+function drag(e) {
+    if (!isDragging) return;
+    const y = e.clientY;
+    const deltaY = y - startY;
+    let newTop = startTop + deltaY;
+    newTop = Math.max(0, Math.min(newTop, window.innerHeight - zonaObjectiu.offsetHeight));
+    zonaObjectiu.style.top = `${newTop}px`;
+    e.preventDefault();
+}
+
+function stopDragging() {
+    isDragging = false;
+}
+
+function iniciarJoc() {
+    if (isPlaying) {
+        location.reload();
+        return;
+    }
+
+    isPlaying = true;
+    punts = 0;
+    tempsInicial = Date.now();
+    tempsZonaObjectiu = 0;
+    botoInici.textContent = 'Reiniciar Joc';
+    instruccions.style.display = 'none';
+
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
                 requestAnimationFrame(actualitzarJoc);
-            }
+            })
+            .catch(error => {
+                console.error('Error accedint al micròfon:', error);
+                isPlaying = false;
+                alert('Necessites permetre l\'accés al micròfon per jugar.');
+            });
+    } else {
+        requestAnimationFrame(actualitzarJoc);
+    }
+}
+
+function actualitzarJoc() {
+    if (!isPlaying) return;
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+
+    const volumMitja = dataArray.reduce((a, b) => a + b) / dataArray.length;
+    const alturaAigua = Math.min(window.innerHeight - 60, volumMitja * 3 * sensibilitatMicrofon);
+
+    velocitatY += (alturaAigua - posicioY) * 0.05;
+    velocitatY *= 0.9;
+    posicioY += velocitatY;
+
+    objecte.style.bottom = `${posicioY + 100}px`;  // Ajustat per la font
+    aigua.style.height = `${alturaAigua}px`;
+
+    const alcadaObjecte = objecte.offsetHeight; // Alçada de l'objecte
+    const posicioZonaObjectiuTop = zonaObjectiu.offsetTop;
+    const posicioZonaObjectiuBottom = posicioZonaObjectiuTop + zonaObjectiu.offsetHeight;
+
+    // Calcular la posició del píxel central de l'objecte
+    const posicioObjecteCentralY = window.innerHeight - (posicioY + 100) - alcadaObjecte / 2;
+
+    // Comprovar si el píxel central de l'objecte està dins la zona objectiu
+    const objecteDinsZona = posicioObjecteCentralY >= posicioZonaObjectiuTop && posicioObjecteCentralY <= posicioZonaObjectiuBottom;
+
+    if (objecteDinsZona) {
+        tempsZonaObjectiu += 1 / 60;
+        punts = Math.floor(tempsZonaObjectiu * 2) * 10;
+        zonaObjectiu.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+        zonaObjectiu.style.borderColor = 'green';
+        objecte.style.animation = 'ballar 0.5s ease-in-out infinite';
+
+        // Probabilitat de mostrar focs artificials
+        if (Math.random() < 0.1) {
+            mostrarFocsArtifici();
         }
+    } else {
+        zonaObjectiu.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
+        zonaObjectiu.style.borderColor = '#ffd700';
+        objecte.style.animation = 'none';
+    }
 
-        function actualitzarJoc() {
-            if (!isPlaying) return;
+    // Actualitzar la rotació de l'objecte basada en la velocitat vertical
+    const rotacioObjecte = Math.min(Math.max(velocitatY * 2, -20), 20);
+    objecte.style.transform = `translateX(-50%) rotate(${rotacioObjecte}deg)`;
 
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(dataArray);
+    puntuacioElement.textContent = `Punts: ${punts}`;
 
-            const volumMitja = dataArray.reduce((a, b) => a + b) / dataArray.length;
-            const alturaAigua = Math.min(window.innerHeight - 60, volumMitja * 3 * sensibilitatMicrofon);
+    requestAnimationFrame(actualitzarJoc);
+}
 
-            velocitatY += (alturaAigua - posicioY) * 0.05;
-            velocitatY *= 0.9;
-            posicioY += velocitatY;
+function mostrarFocsArtifici() {
+    const colors = ['#ff0000', '#ffa500', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#ee82ee'];
+    const centerX = Math.random() * window.innerWidth;
+    const centerY = Math.random() * (window.innerHeight / 2);
 
-            objecte.style.bottom = `${posicioY + 100}px`;  // Ajustat per la font
-            aigua.style.height = `${alturaAigua}px`;
+    for (let i = 0; i < 20; i++) {
+        const focArtifici = document.createElement('div');
+        focArtifici.classList.add('foc-artifici');
 
-            const alcadaObjecte = objecte.offsetHeight; // Alçada de l'objecte
-            const posicioZonaObjectiuTop = zonaObjectiu.offsetTop;
-            const posicioZonaObjectiuBottom = posicioZonaObjectiuTop + zonaObjectiu.offsetHeight;
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 50 + 25;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
 
-            // Calcular la posició del píxel central de l'objecte
-            const posicioObjecteCentralY = window.innerHeight - (posicioY + 100) - alcadaObjecte / 2;
+        focArtifici.style.left = `${centerX}px`;
+        focArtifici.style.top = `${centerY}px`;
+        focArtifici.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        focArtifici.style.setProperty('--tx', `${tx}px`);
+        focArtifici.style.setProperty('--ty', `${ty}px`);
 
-            // Comprovar si el píxel central de l'objecte està dins la zona objectiu
-            const objecteDinsZona = posicioObjecteCentralY >= posicioZonaObjectiuTop && posicioObjecteCentralY <= posicioZonaObjectiuBottom;
+        focArtifici.style.animation = `explotar ${Math.random() * 0.5 + 0.5}s ease-out forwards`;
 
-            if (objecteDinsZona) {
-                tempsZonaObjectiu += 1 / 60;
-                punts = Math.floor(tempsZonaObjectiu * 2) * 10;
-                zonaObjectiu.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
-                zonaObjectiu.style.borderColor = 'green';
-                objecte.style.animation = 'ballar 0.5s ease-in-out infinite';
+        joc.appendChild(focArtifici);
 
-                // Probabilitat de mostrar focs artificials
-                if (Math.random() < 0.1) {
-                    mostrarFocsArtifici();
-                }
-            } else {
-                zonaObjectiu.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
-                zonaObjectiu.style.borderColor = '#ffd700';
-                objecte.style.animation = 'none';
-            }
+        setTimeout(() => {
+            focArtifici.remove();
+        }, 1000);
+    }
+}
 
-            // Actualitzar la rotació de l'objecte basada en la velocitat vertical
-            const rotacioObjecte = Math.min(Math.max(velocitatY * 2, -20), 20);
-            objecte.style.transform = `translateX(-50%) rotate(${rotacioObjecte}deg)`;
+function togglePanellOpcions() {
+    panellOpcions.classList.toggle('obert');
+}
 
-            puntuacioElement.textContent = `Punts: ${punts}`;
-
-            requestAnimationFrame(actualitzarJoc);
-        }
-
-        function mostrarFocsArtifici() {
-            const colors = ['#ff0000', '#ffa500', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#ee82ee'];
-            const centerX = Math.random() * window.innerWidth;
-            const centerY = Math.random() * (window.innerHeight / 2);
-
-            for (let i = 0; i < 20; i++) {
-                const focArtifici = document.createElement('div');
-                focArtifici.classList.add('foc-artifici');
-
-                const angle = Math.random() * Math.PI * 2;
-                const distance = Math.random() * 50 + 25;
-                const tx = Math.cos(angle) * distance;
-                const ty = Math.sin(angle) * distance;
-
-                focArtifici.style.left = `${centerX}px`;
-                focArtifici.style.top = `${centerY}px`;
-                focArtifici.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                focArtifici.style.setProperty('--tx', `${tx}px`);
-                focArtifici.style.setProperty('--ty', `${ty}px`);
-
-                focArtifici.style.animation = `explotar ${Math.random() * 0.5 + 0.5}s ease-out forwards`;
-
-                joc.appendChild(focArtifici);
-
-                setTimeout(() => {
-                    focArtifici.remove();
-                }, 1000);
-            }
-        }
-
-        function togglePanellOpcions() {
-            panellOpcions.classList.toggle('obert');
-        }
     </script>
+
+
 </body>
 
 </html>
