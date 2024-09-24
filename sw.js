@@ -1,4 +1,4 @@
-const CACHE_NAME = 'joc-de-veu-v1.41';
+const CACHE_NAME = 'joc-de-veu-v1.4111';
 const urlsToCache = [
   './',
   './index.html',
