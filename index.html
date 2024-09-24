@@ -67,6 +67,7 @@
             transform: translateX(-50%);
             cursor: move;
             z-index: 2;
+            touch-action: none;
         }
 
 
@@ -341,26 +342,28 @@
         let startY;
         let startTop;
 
-        function startDragging(e) {
-            isDragging = true;
-            startY = e.clientY;
-            startTop = zonaObjectiu.offsetTop;
-            e.preventDefault();
-        }
+function startDragging(e) {
+    isDragging = true;
+    startY = e.clientY;
+    startTop = zonaObjectiu.offsetTop;
+    e.preventDefault(); // Afegit
+}
 
-        function drag(e) {
-            if (!isDragging) return;
-            const y = e.clientY;
-            const deltaY = y - startY;
-            let newTop = startTop + deltaY;
-            newTop = Math.max(0, Math.min(newTop, window.innerHeight - zonaObjectiu.offsetHeight));
-            zonaObjectiu.style.top = `${newTop}px`;
-            e.preventDefault();
-        }
+function drag(e) {
+    if (!isDragging) return;
+    e.preventDefault(); // Afegit
+    const y = e.clientY;
+    const deltaY = y - startY;
+    let newTop = startTop + deltaY;
+    newTop = Math.max(0, Math.min(newTop, window.innerHeight - zonaObjectiu.offsetHeight));
+    zonaObjectiu.style.top = `${newTop}px`;
+}
 
-        function stopDragging() {
-            isDragging = false;
-        }
+function stopDragging(e) {
+    isDragging = false;
+    e.preventDefault(); // Afegit
+}
+
 
         function iniciarJoc() {
             if (isPlaying) {
