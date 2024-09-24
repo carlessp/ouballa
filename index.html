@@ -62,10 +62,13 @@
             border: 2px dashed #fde047;
             position: absolute;
             left: 50%;
+            top: 200px;
+            /* Afegit */
             transform: translateX(-50%);
             cursor: move;
             z-index: 2;
         }
+
 
         #font {
             width: 128px;
@@ -100,7 +103,7 @@
             height: 5px;
             background-color: #374151;
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
         #aigua {
@@ -245,9 +248,10 @@
             Parleu al micròfon per moure l'objecte.<br>
             Manteniu l'objecte dins la zona groga per guanyar punts.
         </div>
-<div id="icona-opcions" class="absolute top-4 right-4 w-12 h-12 bg-blue-500 rounded-full cursor-pointer flex items-center justify-center text-2xl hover:bg-blue-600 transition-colors duration-200">
-    ⚙️
-</div>
+        <div id="icona-opcions"
+            class="absolute top-4 right-4 w-12 h-12 bg-blue-500 rounded-full cursor-pointer flex items-center justify-center text-2xl hover:bg-blue-600 transition-colors duration-200">
+            ⚙️
+        </div>
         <div id="panell-opcions"
             class="absolute top-0 right-0 w-64 h-full bg-white bg-opacity-90 p-6 transform translate-x-full transition-transform duration-300 ease-in-out">
             <h3 class="text-lg font-bold mb-4">Opcions</h3>
@@ -258,225 +262,225 @@
 
     <script>
         let audioContext;
-let analyser;
-let microphone;
-let isPlaying = false;
-let punts = 0;
-let tempsInicial;
-let tempsZonaObjectiu = 0;
+        let analyser;
+        let microphone;
+        let isPlaying = false;
+        let punts = 0;
+        let tempsInicial;
+        let tempsZonaObjectiu = 0;
 
-const objecte = document.getElementById('objecte');
-const aigua = document.getElementById('aigua');
-const botoInici = document.getElementById('boto-inici');
-const puntuacioElement = document.getElementById('puntuacio');
-const zonaObjectiu = document.getElementById('zona-objectiu');
-const instruccions = document.getElementById('instruccions');
-const joc = document.getElementById('joc');
-const iconaOpcions = document.getElementById('icona-opcions');
-const panellOpcions = document.getElementById('panell-opcions');
-const sensibilitatSlider = document.getElementById('sensibilitat-slider');
+        const objecte = document.getElementById('objecte');
+        const aigua = document.getElementById('aigua');
+        const botoInici = document.getElementById('boto-inici');
+        const puntuacioElement = document.getElementById('puntuacio');
+        const zonaObjectiu = document.getElementById('zona-objectiu');
+        const instruccions = document.getElementById('instruccions');
+        const joc = document.getElementById('joc');
+        const iconaOpcions = document.getElementById('icona-opcions');
+        const panellOpcions = document.getElementById('panell-opcions');
+        const sensibilitatSlider = document.getElementById('sensibilitat-slider');
 
-let posicioY = 0;
-let velocitatY = 0;
-let sensibilitatMicrofon = 2.55;
+        let posicioY = 0;
+        let velocitatY = 0;
+        let sensibilitatMicrofon = 2.55;
 
-// Iniciem els event listeners després que el DOM estigui carregat
-document.addEventListener('DOMContentLoaded', () => {
-    // Event listener per al botó d'inici
-    botoInici.addEventListener('click', iniciarJoc);
+        // Iniciem els event listeners després que el DOM estigui carregat
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event listener per al botó d'inici
+            botoInici.addEventListener('click', iniciarJoc);
 
-    // Event listener per a la icona d'opcions
-    iconaOpcions.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePanellOpcions();
-    });
-
-    // Tancar el panell quan es fa clic fora
-    document.addEventListener('click', (e) => {
-        if (panellOpcions.classList.contains('obert') &&
-            !panellOpcions.contains(e.target) &&
-            e.target !== iconaOpcions) {
-            togglePanellOpcions();
-        }
-    });
-
-    // Evitar que els clics dins del panell el tanquin
-    panellOpcions.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-
-    // Configuració del drag and drop per a la zona objectiu utilitzant Pointer Events
-    zonaObjectiu.addEventListener('pointerdown', startDragging);
-    document.addEventListener('pointermove', drag);
-    document.addEventListener('pointerup', stopDragging);
-
-    // Event listener per al slider de sensibilitat
-    sensibilitatSlider.addEventListener('input', (e) => {
-        sensibilitatMicrofon = parseFloat(e.target.value);
-    });
-
-    // Ajustar mides quan es redimensiona la finestra
-    window.addEventListener('resize', () => {
-        zonaObjectiu.style.top = `${Math.min(zonaObjectiu.offsetTop, window.innerHeight - zonaObjectiu.offsetHeight)}px`;
-    });
-
-    // Registrar el Service Worker
-    if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(registration => {
-      console.log('Service Worker registered successfully:', registration);
-    })
-    .catch(error => {
-      console.log('Service Worker registration failed:', error);
-    });
-}
-
-});
-
-let isDragging = false;
-let startY;
-let startTop;
-
-function startDragging(e) {
-    isDragging = true;
-    startY = e.clientY;
-    startTop = zonaObjectiu.offsetTop;
-    e.preventDefault();
-}
-
-function drag(e) {
-    if (!isDragging) return;
-    const y = e.clientY;
-    const deltaY = y - startY;
-    let newTop = startTop + deltaY;
-    newTop = Math.max(0, Math.min(newTop, window.innerHeight - zonaObjectiu.offsetHeight));
-    zonaObjectiu.style.top = `${newTop}px`;
-    e.preventDefault();
-}
-
-function stopDragging() {
-    isDragging = false;
-}
-
-function iniciarJoc() {
-    if (isPlaying) {
-        location.reload();
-        return;
-    }
-
-    isPlaying = true;
-    punts = 0;
-    tempsInicial = Date.now();
-    tempsZonaObjectiu = 0;
-    botoInici.textContent = 'Reiniciar Joc';
-    instruccions.style.display = 'none';
-
-    if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                microphone = audioContext.createMediaStreamSource(stream);
-                microphone.connect(analyser);
-                requestAnimationFrame(actualitzarJoc);
-            })
-            .catch(error => {
-                console.error('Error accedint al micròfon:', error);
-                isPlaying = false;
-                alert('Necessites permetre l\'accés al micròfon per jugar.');
+            // Event listener per a la icona d'opcions
+            iconaOpcions.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePanellOpcions();
             });
-    } else {
-        requestAnimationFrame(actualitzarJoc);
-    }
-}
 
-function actualitzarJoc() {
-    if (!isPlaying) return;
+            // Tancar el panell quan es fa clic fora
+            document.addEventListener('click', (e) => {
+                if (panellOpcions.classList.contains('obert') &&
+                    !panellOpcions.contains(e.target) &&
+                    e.target !== iconaOpcions) {
+                    togglePanellOpcions();
+                }
+            });
 
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(dataArray);
+            // Evitar que els clics dins del panell el tanquin
+            panellOpcions.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
 
-    const volumMitja = dataArray.reduce((a, b) => a + b) / dataArray.length;
-    const alturaAigua = Math.min(window.innerHeight - 60, volumMitja * 3 * sensibilitatMicrofon);
+            // Configuració del drag and drop per a la zona objectiu utilitzant Pointer Events
+            zonaObjectiu.addEventListener('pointerdown', startDragging);
+            document.addEventListener('pointermove', drag);
+            document.addEventListener('pointerup', stopDragging);
 
-    velocitatY += (alturaAigua - posicioY) * 0.05;
-    velocitatY *= 0.9;
-    posicioY += velocitatY;
+            // Event listener per al slider de sensibilitat
+            sensibilitatSlider.addEventListener('input', (e) => {
+                sensibilitatMicrofon = parseFloat(e.target.value);
+            });
 
-    objecte.style.bottom = `${posicioY + 100}px`;  // Ajustat per la font
-    aigua.style.height = `${alturaAigua}px`;
+            // Ajustar mides quan es redimensiona la finestra
+            window.addEventListener('resize', () => {
+                zonaObjectiu.style.top = `${Math.min(zonaObjectiu.offsetTop, window.innerHeight - zonaObjectiu.offsetHeight)}px`;
+            });
 
-    const alcadaObjecte = objecte.offsetHeight; // Alçada de l'objecte
-    const posicioZonaObjectiuTop = zonaObjectiu.offsetTop;
-    const posicioZonaObjectiuBottom = posicioZonaObjectiuTop + zonaObjectiu.offsetHeight;
+            // Registrar el Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            }
 
-    // Calcular la posició del píxel central de l'objecte
-    const posicioObjecteCentralY = window.innerHeight - (posicioY + 100) - alcadaObjecte / 2;
+        });
 
-    // Comprovar si el píxel central de l'objecte està dins la zona objectiu
-    const objecteDinsZona = posicioObjecteCentralY >= posicioZonaObjectiuTop && posicioObjecteCentralY <= posicioZonaObjectiuBottom;
+        let isDragging = false;
+        let startY;
+        let startTop;
 
-    if (objecteDinsZona) {
-        tempsZonaObjectiu += 1 / 60;
-        punts = Math.floor(tempsZonaObjectiu * 2) * 10;
-        zonaObjectiu.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
-        zonaObjectiu.style.borderColor = 'green';
-        objecte.style.animation = 'ballar 0.5s ease-in-out infinite';
-
-        // Probabilitat de mostrar focs artificials
-        if (Math.random() < 0.1) {
-            mostrarFocsArtifici();
+        function startDragging(e) {
+            isDragging = true;
+            startY = e.clientY;
+            startTop = zonaObjectiu.offsetTop;
+            e.preventDefault();
         }
-    } else {
-        zonaObjectiu.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
-        zonaObjectiu.style.borderColor = '#ffd700';
-        objecte.style.animation = 'none';
-    }
 
-    // Actualitzar la rotació de l'objecte basada en la velocitat vertical
-    const rotacioObjecte = Math.min(Math.max(velocitatY * 2, -20), 20);
-    objecte.style.transform = `translateX(-50%) rotate(${rotacioObjecte}deg)`;
+        function drag(e) {
+            if (!isDragging) return;
+            const y = e.clientY;
+            const deltaY = y - startY;
+            let newTop = startTop + deltaY;
+            newTop = Math.max(0, Math.min(newTop, window.innerHeight - zonaObjectiu.offsetHeight));
+            zonaObjectiu.style.top = `${newTop}px`;
+            e.preventDefault();
+        }
 
-    puntuacioElement.textContent = `Punts: ${punts}`;
+        function stopDragging() {
+            isDragging = false;
+        }
 
-    requestAnimationFrame(actualitzarJoc);
-}
+        function iniciarJoc() {
+            if (isPlaying) {
+                location.reload();
+                return;
+            }
 
-function mostrarFocsArtifici() {
-    const colors = ['#ff0000', '#ffa500', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#ee82ee'];
-    const centerX = Math.random() * window.innerWidth;
-    const centerY = Math.random() * (window.innerHeight / 2);
+            isPlaying = true;
+            punts = 0;
+            tempsInicial = Date.now();
+            tempsZonaObjectiu = 0;
+            botoInici.textContent = 'Reiniciar Joc';
+            instruccions.style.display = 'none';
 
-    for (let i = 0; i < 20; i++) {
-        const focArtifici = document.createElement('div');
-        focArtifici.classList.add('foc-artifici');
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
 
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * 50 + 25;
-        const tx = Math.cos(angle) * distance;
-        const ty = Math.sin(angle) * distance;
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
+                        requestAnimationFrame(actualitzarJoc);
+                    })
+                    .catch(error => {
+                        console.error('Error accedint al micròfon:', error);
+                        isPlaying = false;
+                        alert('Necessites permetre l\'accés al micròfon per jugar.');
+                    });
+            } else {
+                requestAnimationFrame(actualitzarJoc);
+            }
+        }
 
-        focArtifici.style.left = `${centerX}px`;
-        focArtifici.style.top = `${centerY}px`;
-        focArtifici.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        focArtifici.style.setProperty('--tx', `${tx}px`);
-        focArtifici.style.setProperty('--ty', `${ty}px`);
+        function actualitzarJoc() {
+            if (!isPlaying) return;
 
-        focArtifici.style.animation = `explotar ${Math.random() * 0.5 + 0.5}s ease-out forwards`;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
 
-        joc.appendChild(focArtifici);
+            const volumMitja = dataArray.reduce((a, b) => a + b) / dataArray.length;
+            const alturaAigua = Math.min(window.innerHeight - 60, volumMitja * 3 * sensibilitatMicrofon);
 
-        setTimeout(() => {
-            focArtifici.remove();
-        }, 1000);
-    }
-}
+            velocitatY += (alturaAigua - posicioY) * 0.05;
+            velocitatY *= 0.9;
+            posicioY += velocitatY;
 
-function togglePanellOpcions() {
-    panellOpcions.classList.toggle('obert');
-}
+            objecte.style.bottom = `${posicioY + 100}px`;  // Ajustat per la font
+            aigua.style.height = `${alturaAigua}px`;
+
+            const alcadaObjecte = objecte.offsetHeight; // Alçada de l'objecte
+            const posicioZonaObjectiuTop = zonaObjectiu.offsetTop;
+            const posicioZonaObjectiuBottom = posicioZonaObjectiuTop + zonaObjectiu.offsetHeight;
+
+            // Calcular la posició del píxel central de l'objecte
+            const posicioObjecteCentralY = window.innerHeight - (posicioY + 100) - alcadaObjecte / 2;
+
+            // Comprovar si el píxel central de l'objecte està dins la zona objectiu
+            const objecteDinsZona = posicioObjecteCentralY >= posicioZonaObjectiuTop && posicioObjecteCentralY <= posicioZonaObjectiuBottom;
+
+            if (objecteDinsZona) {
+                tempsZonaObjectiu += 1 / 60;
+                punts = Math.floor(tempsZonaObjectiu * 2) * 10;
+                zonaObjectiu.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+                zonaObjectiu.style.borderColor = 'green';
+                objecte.style.animation = 'ballar 0.5s ease-in-out infinite';
+
+                // Probabilitat de mostrar focs artificials
+                if (Math.random() < 0.1) {
+                    mostrarFocsArtifici();
+                }
+            } else {
+                zonaObjectiu.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
+                zonaObjectiu.style.borderColor = '#ffd700';
+                objecte.style.animation = 'none';
+            }
+
+            // Actualitzar la rotació de l'objecte basada en la velocitat vertical
+            const rotacioObjecte = Math.min(Math.max(velocitatY * 2, -20), 20);
+            objecte.style.transform = `translateX(-50%) rotate(${rotacioObjecte}deg)`;
+
+            puntuacioElement.textContent = `Punts: ${punts}`;
+
+            requestAnimationFrame(actualitzarJoc);
+        }
+
+        function mostrarFocsArtifici() {
+            const colors = ['#ff0000', '#ffa500', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#ee82ee'];
+            const centerX = Math.random() * window.innerWidth;
+            const centerY = Math.random() * (window.innerHeight / 2);
+
+            for (let i = 0; i < 20; i++) {
+                const focArtifici = document.createElement('div');
+                focArtifici.classList.add('foc-artifici');
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 50 + 25;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                focArtifici.style.left = `${centerX}px`;
+                focArtifici.style.top = `${centerY}px`;
+                focArtifici.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                focArtifici.style.setProperty('--tx', `${tx}px`);
+                focArtifici.style.setProperty('--ty', `${ty}px`);
+
+                focArtifici.style.animation = `explotar ${Math.random() * 0.5 + 0.5}s ease-out forwards`;
+
+                joc.appendChild(focArtifici);
+
+                setTimeout(() => {
+                    focArtifici.remove();
+                }, 1000);
+            }
+        }
+
+        function togglePanellOpcions() {
+            panellOpcions.classList.toggle('obert');
+        }
 
     </script>
 
