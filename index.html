@@ -55,17 +55,20 @@
             }
         }
 
-        #zona-objectiu {
-            width: 128px;
-            height: 48px;
-            background-color: rgba(253, 224, 71, 0.3);
-            border: 2px dashed #fde047;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            cursor: move;
-            z-index: 2;
-        }
+#zona-objectiu {
+    width: 128px;
+    height: 48px;
+    background-color: rgba(253, 224, 71, 0.3);
+    border: 2px dashed #fde047;
+    position: absolute;
+    left: 50%;
+    top: 50%; /* Assignem una posició inicial */
+    transform: translate(-50%, -50%);
+    cursor: move;
+    z-index: 2;
+    touch-action: none; /* Prevenir comportaments per defecte */
+}
+
 
         #font {
             width: 128px;
@@ -305,10 +308,16 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
     });
 
-    // Configuració del drag and drop per a la zona objectiu utilitzant Pointer Events
+    // Configuració del drag and drop per a la zona objectiu utilitzant Pointer i Touch Events
     zonaObjectiu.addEventListener('pointerdown', startDragging);
+    zonaObjectiu.addEventListener('touchstart', startDraggingTouch, { passive: false });
+
     document.addEventListener('pointermove', drag);
+    document.addEventListener('touchmove', dragTouch, { passive: false });
+
     document.addEventListener('pointerup', stopDragging);
+    document.addEventListener('touchend', stopDraggingTouch);
+    document.addEventListener('touchcancel', stopDraggingTouch);
 
     // Event listener per al slider de sensibilitat
     sensibilitatSlider.addEventListener('input', (e) => {
@@ -325,6 +334,7 @@ let isDragging = false;
 let startY;
 let startTop;
 
+// Funcions per Pointer Events
 function startDragging(e) {
     isDragging = true;
     startY = e.clientY;
@@ -334,7 +344,19 @@ function startDragging(e) {
 
 function drag(e) {
     if (!isDragging) return;
-    const y = e.clientY;
+    let y;
+    if (e.type.startsWith('touch')) {
+        // Gestionar events de tacte
+        if (e.touches.length > 0) {
+            y = e.touches[0].clientY;
+        } else {
+            return;
+        }
+    } else {
+        // Gestionar events de punter
+        y = e.clientY;
+    }
+
     const deltaY = y - startY;
     let newTop = startTop + deltaY;
     newTop = Math.max(0, Math.min(newTop, window.innerHeight - zonaObjectiu.offsetHeight));
@@ -345,6 +367,19 @@ function drag(e) {
 function stopDragging() {
     isDragging = false;
 }
+
+function startDraggingTouch(e) {
+    startDragging(e);
+}
+
+function dragTouch(e) {
+    drag(e);
+}
+
+function stopDraggingTouch(e) {
+    stopDragging();
+}
+
 
 function iniciarJoc() {
     if (isPlaying) {
