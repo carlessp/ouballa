@@ -1,11 +1,13 @@
 const CACHE_NAME = 'joc-de-veu-v1.1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192x192.png',
+  './icon-512x512.png'
 ];
+
+// Rest of your service worker code remains the same
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
