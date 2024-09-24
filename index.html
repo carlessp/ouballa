@@ -311,9 +311,11 @@
             });
 
             // Configuració del drag and drop per a la zona objectiu utilitzant Pointer Events
-            zonaObjectiu.addEventListener('pointerdown', startDragging);
-            document.addEventListener('pointermove', drag);
-            document.addEventListener('pointerup', stopDragging);
+            zonaObjectiu.addEventListener('touchstart', startDragging, { passive: false });
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', stopDragging, { passive: false });
+
+
 
             // Event listener per al slider de sensibilitat
             sensibilitatSlider.addEventListener('input', (e) => {
@@ -342,27 +344,29 @@
         let startY;
         let startTop;
 
-function startDragging(e) {
-    isDragging = true;
-    startY = e.clientY;
-    startTop = zonaObjectiu.offsetTop;
-    e.preventDefault(); // Afegit
-}
+        function startDragging(e) {
+            isDragging = true;
+            const event = e.touches ? e.touches[0] : e;
+            startY = event.clientY;
+            startTop = zonaObjectiu.offsetTop;
+            e.preventDefault();
+        }
 
-function drag(e) {
-    if (!isDragging) return;
-    e.preventDefault(); // Afegit
-    const y = e.clientY;
-    const deltaY = y - startY;
-    let newTop = startTop + deltaY;
-    newTop = Math.max(0, Math.min(newTop, window.innerHeight - zonaObjectiu.offsetHeight));
-    zonaObjectiu.style.top = `${newTop}px`;
-}
+        function drag(e) {
+            if (!isDragging) return;
+            const event = e.touches ? e.touches[0] : e;
+            const y = event.clientY;
+            const deltaY = y - startY;
+            let newTop = startTop + deltaY;
+            newTop = Math.max(0, Math.min(newTop, window.innerHeight - zonaObjectiu.offsetHeight));
+            zonaObjectiu.style.top = `${newTop}px`;
+            e.preventDefault();
+        }
 
-function stopDragging(e) {
-    isDragging = false;
-    e.preventDefault(); // Afegit
-}
+        function stopDragging(e) {
+            isDragging = false;
+            e.preventDefault();
+        }
 
 
         function iniciarJoc() {
