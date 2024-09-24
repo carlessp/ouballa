@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Joc de Feedback de Veu amb Font per a alumnes amb disàrtria</title>
+    <title>Joc</title>
     <style>
         body,
         html {
@@ -50,18 +50,20 @@
         }
 
         #zona-objectiu {
-            width: 128px;
-            height: 48px;
-            background-color: rgba(253, 224, 71, 0.3);
-            border: 2px dashed #fde047;
-            position: absolute;
-            left: 50%;
-            top: 200px; /* Posició inicial afegida */
-            transform: translateX(-50%);
-            cursor: move;
-            z-index: 4; /* Incrementat per assegurar interactivitat */
-            transition: background-color 0.3s, border-color 0.3s;
-        }
+    width: 128px;
+    height: 48px;
+    background-color: rgba(253, 224, 71, 0.3);
+    border: 2px dashed #fde047;
+    position: absolute;
+    left: 50%;
+    top: 200px; /* Posició inicial */
+    transform: translateX(-50%);
+    cursor: move;
+    z-index: 4;
+    transition: background-color 0.3s, border-color 0.3s;
+    touch-action: none; /* Afegit per permetre el drag and drop al mòbil */
+}
+
 
         #font {
             width: 128px;
@@ -233,7 +235,8 @@
             class="absolute left-1/2 transform -translate-x-1/2 w-32 h-12 bg-yellow-200 bg-opacity-30 border-2 border-yellow-400 border-dashed cursor-move">
         </div>
         <button id="boto-inici"
-            class="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors duration-200">Comença!</button>
+            class="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors duration-200">Iniciar
+            Joc</button>
         <div id="puntuacio" class="absolute top-4 right-16 text-lg font-bold text-white">Punts: 0</div>
         <div id="instruccions"
             class="absolute bottom-28 left-4 right-4 text-sm text-center text-white bg-black bg-opacity-50 p-2 rounded">
@@ -314,7 +317,7 @@
             // Ajustar mides quan es redimensiona la finestra
             window.addEventListener('resize', () => {
                 const maxTop = window.innerHeight - zonaObjectiu.offsetHeight - 20; // 20px de marge
-                const currentTop = parseInt(zonaObjectiu.style.top, 10);
+                const currentTop = parseFloat(getComputedStyle(zonaObjectiu).top);
                 if (currentTop > maxTop) {
                     zonaObjectiu.style.top = `${maxTop}px`;
                 }
@@ -328,20 +331,22 @@
         function startDragging(e) {
             isDragging = true;
             startY = e.clientY;
-            startTop = parseInt(zonaObjectiu.style.top, 10) || 200; // Utilitzar 200 si no hi ha valor
+            // Utilitzar getComputedStyle per obtenir el valor actual de 'top'
+            startTop = parseFloat(getComputedStyle(zonaObjectiu).top) || 200;
             e.preventDefault();
         }
 
         function drag(e) {
-            if (!isDragging) return;
-            const y = e.clientY;
-            const deltaY = y - startY;
-            let newTop = startTop + deltaY;
-            const maxTop = window.innerHeight - zonaObjectiu.offsetHeight - 20; // 20px de marge
-            newTop = Math.max(20, Math.min(newTop, maxTop)); // Limitar entre 20px i maxTop
-            zonaObjectiu.style.top = `${newTop}px`;
-            e.preventDefault();
-        }
+    if (!isDragging) return;
+    const y = e.clientY;
+    const deltaY = y - startY;
+    let newTop = startTop + deltaY;
+    const maxTop = window.innerHeight - zonaObjectiu.offsetHeight - 20; // 20px de marge
+    newTop = Math.max(20, Math.min(newTop, maxTop)); // Limitar entre 20px i maxTop
+    zonaObjectiu.style.top = `${newTop}px`;
+    e.preventDefault();
+}
+
 
         function stopDragging() {
             isDragging = false;
