@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Joc de la Font 8-bit i l'Ou per a alumnes amb disàrtria</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 100vh;
+      background-image: url('https://i.imgur.com/3JzJ6GY.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    #joc {
+      position: relative;
+      width: 100vw;
+      height: 600px;
+    }
+
+    #fons {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      /* width: 100%; */
+      /* height: 100%; Ajusta aquesta altura segons necessitis */
+      background-image: url('https://i.imgur.com/sCbISsu.jpg');
+      background-size: cover;
+      background-position: center bottom;
+      background-repeat: no-repeat;
+      z-index: 0;
+    }
+
+    #base-pedra {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 40px;
+      background-color: #808080;
+      image-rendering: pixelated;
+    }
+
+    #base-pedra::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background-image:
+        linear-gradient(90deg, #6a6a6a 25%, transparent 25%),
+        linear-gradient(90deg, transparent 75%, #6a6a6a 75%);
+      background-size: 20px 10px;
+    }
+
+    /* #gespa {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background-color: #228B22;
+            image-rendering: pixelated;
+        }
+        #gespa::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background-image: 
+                linear-gradient(45deg, transparent 50%, #228B22 50%),
+                linear-gradient(-45deg, transparent 50%, #228B22 50%);
+            background-size: 10px 10px;
+            background-position: 0 5px;
+        } */
+    #font {
+      position: absolute;
+      bottom: 8px;
+      left: 50.6%;
+      transform: translateX(-50%);
+      width: 230px;
+      height: 225px;
+      background: url('https://i.imgur.com/at0CIjo.png') no-repeat center;
+      background-size: contain;
+      image-rendering: pixelated;
+      z-index: 2;
+    }
+
+    @keyframes waterFlow {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-200px);
+      }
+    }
+
+    #aigua {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 200px;
+      overflow: hidden;
+      z-index: 1;
+      transition: height 0.1s;
+    }
+
+    #aigua-animacio {
+      width: 100%;
+      height: 200%;
+      background: url('https://i.imgur.com/YLIfV3M.png') repeat-y;
+      background-size: 100% 50%;
+      animation: waterFlow 2s linear infinite;
+      image-rendering: pixelated;
+    }
+
+    #aigua::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      animation: waterWave 2s infinite linear;
+    }
+
+    #ou {
+      position: absolute;
+      bottom: 225px;
+      left: 50%;
+      width: 32px;
+      height: 40px;
+      background-color: #FFFFFF;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      transform: translateX(-50%);
+      image-rendering: pixelated;
+      box-shadow:
+        2px 0 0 #000,
+        -2px 0 0 #000,
+        0 -2px 0 #000,
+        0 2px 0 #000;
+      z-index: 3;
+      transition: box-shadow 0.3s;
+    }
+
+    #ou.brillant {
+      box-shadow:
+        2px 0 0 #FFD700,
+        -2px 0 0 #FFD700,
+        0 -2px 0 #FFD700,
+        0 2px 0 #FFD700;
+    }
+
+    #botoDInici {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #puntuacio {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      background: white;
+    }
+
+    #zonaObjectiu {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 40px;
+      background-color: rgba(255, 255, 0, 0.3);
+      border: 2px dashed yellow;
+      z-index: 4;
+      cursor: move;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    #instruccions {
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      font-size: 14px;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      transition: opacity 0.5s;
+    }
+
+    .foc-artifici {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      transform-origin: center;
+      opacity: 0;
+    }
+
+    @keyframes explotar {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="joc">
+    <div id="fons"></div>
+    <!-- <div id="gespa"></div> -->
+    <div id="aigua">
+      <div id="aigua-animacio"></div>
+    </div>
+    <div id="font"></div>
+    <div id="ou"></div>
+    <div id="zonaObjectiu"></div>
+    <button id="botoDInici">Iniciar Joc</button>
+    <div id="puntuacio">Punts: 0</div>
+    <div id="instruccions">
+      Arrossegueu la zona groga per ajustar la dificultat.<br>
+            Parleu al micròfon per moure l'ou.<br>
+            Manteniu l'ou dins la zona groga per guanyar punts.
+    </div>
+  </div>
+
+  <script>
+    let audioContext;
+        let analyser;
+        let microphone;
+        let isPlaying = false;
+        let punts = 0;
+        let tempsInicial;
+        let tempsZonaObjectiu = 0;
+
+        const ou = document.getElementById('ou');
+        const aigua = document.getElementById('aigua');
+        const botoDInici = document.getElementById('botoDInici');
+        const puntuacioElement = document.getElementById('puntuacio');
+        const zonaObjectiu = document.getElementById('zonaObjectiu');
+        const instruccions = document.getElementById('instruccions');
+
+        let velocitatY = 0;
+        let posicioY = 0;
+        let amplitudOscilacio = 0;
+        let freqOscilacio = 0;
+        let tempsOscilacio = 0;
+
+        const ouAlcada = 40;
+        const ouAmplada = 32;
+
+        botoDInici.addEventListener('click', iniciarJoc);
+
+        // Configuració del drag and drop per a la zona objectiu
+        let isDragging = false;
+        let startY;
+        let startTop;
+
+        zonaObjectiu.addEventListener('mousedown', startDragging);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDragging);
+
+        zonaObjectiu.addEventListener('touchstart', startDragging);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', stopDragging);
+
+        function startDragging(e) {
+            isDragging = true;
+            startY = e.clientY || e.touches[0].clientY;
+            startTop = zonaObjectiu.offsetTop;
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            const y = e.clientY || e.touches[0].clientY;
+            const deltaY = y - startY;
+            let newTop = startTop + deltaY;
+
+            // Limitar el moviment dins del joc
+            newTop = Math.max(0, Math.min(newTop, 560)); // 600 - 40 (alçada de la zona)
+
+            zonaObjectiu.style.top = `${newTop}px`;
+            e.preventDefault();
+        }
+
+        function stopDragging() {
+            isDragging = false;
+        }
+
+        function iniciarJoc() {
+            if (isPlaying) {
+                location.reload();
+                return;
+            }
+
+            isPlaying = true;
+            punts = 0;
+            tempsInicial = Date.now();
+            tempsZonaObjectiu = 0;
+            botoDInici.textContent = 'Reiniciar Joc';
+            instruccions.style.opacity = '0'; // Amagar les instruccions
+            
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
+                        requestAnimationFrame(actualitzarJoc);
+                    })
+                    .catch(error => {
+                        console.error('Error accedint al micròfon:', error);
+                        isPlaying = false;
+                    });
+            } else {
+                requestAnimationFrame(actualitzarJoc);
+            }
+                tempsAnterior = performance.now();
+                requestAnimationFrame(actualitzarJoc);
+        }
+
+        let tempsAnterior = 0;
+
+function actualitzarJoc(tempsActual) {
+    if (!isPlaying) return;
+
+    // Calculem el temps transcorregut des de l'última actualització
+    const tempsTranscorregut = (tempsActual - tempsAnterior) / 1000; // Convertim a segons
+    tempsAnterior = tempsActual;
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+
+    const volumMitja = dataArray.reduce((a, b) => a + b) / dataArray.length;
+    const alturaAigua = 190 + (Math.min(450, volumMitja * 8));
+
+    const deltaY = alturaAigua - posicioY;
+    velocitatY += deltaY * 0.1;
+    velocitatY *= 0.6;
+    posicioY += velocitatY;
+
+    amplitudOscilacio = Math.min(10, volumMitja / 5);
+    freqOscilacio = 0.4 + volumMitja / 1000;
+    tempsOscilacio += freqOscilacio;
+    const oscilacio = Math.sin(tempsOscilacio) * amplitudOscilacio;
+
+    const posicioOuY = 60 + posicioY + oscilacio;
+    ou.style.bottom = `${posicioOuY}px`;
+    ou.style.left = `${window.innerWidth / 2 + oscilacio}px`;
+
+    aigua.style.height = `${posicioOuY - 60}px`;
+
+    // Comprovar si almenys un terç de l'ou està dins la zona objectiu
+    const posicioZonaObjectiuTop = zonaObjectiu.offsetTop;
+    const posicioZonaObjectiuBottom = posicioZonaObjectiuTop + 40; // Alçada de la zona objectiu
+    const posicioOuSuperiorY = 600 - posicioOuY - ouAlcada; // Convertir de bottom a top
+    const posicioOuInferiorY = posicioOuSuperiorY + ouAlcada; // Calcula la posició de la part inferior de l'ou
+
+    const tercOu = ouAlcada / 3;
+
+    if (
+        (posicioOuSuperiorY + tercOu >= (posicioZonaObjectiuTop + 5) && posicioOuSuperiorY + tercOu <= (posicioZonaObjectiuBottom - 5)) || 
+        (posicioOuInferiorY - tercOu >= (posicioZonaObjectiuTop + 5) && posicioOuInferiorY - tercOu <= (posicioZonaObjectiuBottom - 5)) || 
+        (posicioOuSuperiorY + tercOu <= (posicioZonaObjectiuTop + 5) && posicioOuInferiorY - tercOu >= (posicioZonaObjectiuBottom - 5))
+    ) {
+        tempsZonaObjectiu += tempsTranscorregut;
+        punts = Math.floor(tempsZonaObjectiu * 2)*10;
+        zonaObjectiu.style.backgroundColor = 'rgba(0, 255, 0, 0.3)'; // Verd quan l'ou és dins
+        zonaObjectiu.style.borderColor = 'green';
+        ou.classList.add('brillant');
+        mostrarFocsArtifici();
+    } else {
+        zonaObjectiu.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; // Groc quan l'ou és fora
+        zonaObjectiu.style.borderColor = 'yellow';
+        ou.classList.remove('brillant');
+    }
+
+    puntuacioElement.textContent = `Punts: ${punts}`;
+
+    requestAnimationFrame(actualitzarJoc);
+}
+
+function mostrarFocsArtifici() {
+    const colors = ['#ff0000', '#ffa500', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#ee82ee'];
+    const focsArtificiContainer = document.createElement('div');
+    focsArtificiContainer.classList.add('focs-artifici-container');
+    joc.appendChild(focsArtificiContainer);
+
+    const centerX = Math.random() * window.innerWidth;
+    const centerY = Math.random() * (window.innerHeight / 2);
+
+    for (let i = 0; i < 50; i++) {
+        const focArtifici = document.createElement('div');
+        focArtifici.classList.add('foc-artifici');
+        
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 100 + 50;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        
+        focArtifici.style.left = `${centerX}px`;
+        focArtifici.style.top = `${centerY}px`;
+        focArtifici.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        focArtifici.style.setProperty('--tx', `${tx}px`);
+        focArtifici.style.setProperty('--ty', `${ty}px`);
+        
+        focArtifici.style.animation = `explotar ${Math.random() * 0.5 + 0.5}s ease-out forwards`;
+        focArtifici.style.animationDelay = `${Math.random() * 0.2}s`;
+        
+        focsArtificiContainer.appendChild(focArtifici);
+    }
+
+    setTimeout(() => {
+        focsArtificiContainer.remove();
+    }, 2000);
+}
+  </script>
+</body>
+
+</html>
